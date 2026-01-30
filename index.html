@@ -122,7 +122,7 @@ button {
     font-size: 3rem;
     font-weight: bold;
     color: white;
-    z-index: 3; /* boven zwart vlak */
+    z-index: 3;
 }
 
 @keyframes fadeIn {
@@ -137,7 +137,6 @@ button {
 
 <div id="container">
     <button id="scanBtn">Scan</button>
-
     <div id="scanText"></div>
     <div id="scannedList"></div>
 
@@ -154,8 +153,9 @@ button {
     <div id="soonWrapper"></div>
 </div>
 
-<audio id="sound" src="media/sound.mp3" preload="auto"></audio>
-<audio id="glitchSound" src="media/glitch.mp3" preload="auto"></audio>
+<!-- root files, geen media map -->
+<audio id="sound" src="sound.mp3" preload="auto"></audio>
+<audio id="glitchSound" src="glitch.mp3" preload="auto"></audio>
 
 <script>
 const scanBtn = document.getElementById("scanBtn");
@@ -250,7 +250,7 @@ function fadeToVideo() {
     blackout.style.background = "black";
 
     const video = document.createElement("video");
-    video.src = "media/video.mp4";
+    video.src = "video.mp4"; // root path
     video.autoplay = true;
     video.muted = true;
     video.playsInline = true;
@@ -268,13 +268,13 @@ function fadeToVideo() {
 
     try { sound.play(); } catch {}
 
-    // altijd blackLayer + SOON na 7 sec fallback
+    // fallback: always show blackLayer + soon after 7 sec
     setTimeout(() => {
         blackLayer.style.display = "block";
         showSoon();
     }, 7000);
 
-    // fallback als video eindigt (optioneel)
+    // optional fallback: when video ends
     video.addEventListener("ended", () => {
         blackLayer.style.display = "block";
         showSoon();
@@ -283,7 +283,7 @@ function fadeToVideo() {
 
 // --- SOON GLITCH ---
 function showSoon() {
-    if (soonWrapper.dataset.active === "true") return; // enkel 1x
+    if (soonWrapper.dataset.active === "true") return;
     soonWrapper.dataset.active = "true";
 
     soonWrapper.textContent = "";
@@ -304,7 +304,7 @@ function showSoon() {
 
     // --- typing ---
     const type = setInterval(() => {
-        soonWrapper.textContent = text.slice(0, i+1); // stabiel
+        soonWrapper.textContent = text.slice(0, i+1);
         i++;
         if (i >= text.length) clearInterval(type);
     }, 600);
@@ -329,3 +329,4 @@ function showSoon() {
 
 </body>
 </html>
+
