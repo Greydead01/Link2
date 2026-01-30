@@ -83,7 +83,6 @@ button {
     position: fixed;
     inset: 0;
     width: 100vw;
-    height: 100vh;
     height: 100dvh;
     background: black;
     display: none;
@@ -123,7 +122,7 @@ button {
     font-size: 3rem;
     font-weight: bold;
     color: white;
-    z-index: 3;
+    z-index: 3; /* boven zwart vlak */
 }
 
 @keyframes fadeIn {
@@ -138,11 +137,14 @@ button {
 
 <div id="container">
     <button id="scanBtn">Scan</button>
+
     <div id="scanText"></div>
     <div id="scannedList"></div>
+
     <div id="progressBox">
         <div id="progressBar"></div>
     </div>
+
     <div id="results"></div>
     <div id="virusList"></div>
 </div>
@@ -152,7 +154,6 @@ button {
     <div id="soonWrapper"></div>
 </div>
 
-<!-- audio -->
 <audio id="sound" src="media/sound.mp3" preload="auto"></audio>
 <audio id="glitchSound" src="media/glitch.mp3" preload="auto"></audio>
 
@@ -183,10 +184,6 @@ scanBtn.addEventListener("click", () => {
 
     const duration = 5000;
     const start = performance.now();
-
-    // --- Mobile unlock ---
-    try { sound.play(); } catch {}
-    try { glitchSound.play(); glitchSound.pause(); glitchSound.currentTime = 0; } catch {}
 
     function animate(now) {
         const t = Math.min((now - start) / duration, 1);
@@ -252,7 +249,6 @@ function fadeToVideo() {
     blackout.style.display = "flex";
     blackout.style.background = "black";
 
-    // video element
     const video = document.createElement("video");
     video.src = "media/video.mp4";
     video.autoplay = true;
@@ -270,15 +266,15 @@ function fadeToVideo() {
 
     blackout.appendChild(video);
 
-    // Fallback: start SOON na 7 sec als video niet speelt
+    try { sound.play(); } catch {}
+
+    // altijd blackLayer + SOON na 7 sec fallback
     setTimeout(() => {
-        if (!blackLayer.style.display || blackLayer.style.display === "none") {
-            blackLayer.style.display = "block";
-            showSoon();
-        }
+        blackLayer.style.display = "block";
+        showSoon();
     }, 7000);
 
-    // Video klaar → zwart vlak + SOON
+    // fallback als video eindigt (optioneel)
     video.addEventListener("ended", () => {
         blackLayer.style.display = "block";
         showSoon();
@@ -287,12 +283,13 @@ function fadeToVideo() {
 
 // --- SOON GLITCH ---
 function showSoon() {
-    blackLayer.style.display = "block"; // volledige overlay
+    if (soonWrapper.dataset.active === "true") return; // enkel 1x
+    soonWrapper.dataset.active = "true";
+
     soonWrapper.textContent = "";
     soonWrapper.style.zIndex = 3;
     soonWrapper.style.color = "white";
 
-    // speel glitch sound op moment van SOON
     try {
         glitchSound.currentTime = 0;
         glitchSound.volume = glitchPlayedOnce ? 0.1 : 1.0;
@@ -305,28 +302,27 @@ function showSoon() {
     const colors = ["#ffd6e7", "#cce6ff", "#ffffff", "#fff5cc"];
     const startTime = performance.now();
 
-    // --- typing effect ---
+    // --- typing ---
     const type = setInterval(() => {
-        soonWrapper.textContent += text[i];
+        soonWrapper.textContent = text.slice(0, i+1); // stabiel
         i++;
         if (i >= text.length) clearInterval(type);
     }, 600);
 
-    // --- glitch movement & color for 3s ---
+    // --- glitch movement & color ---
     function glitchMove(now) {
         if (now - startTime > 3000) {
             soonWrapper.style.transform = "translate(-50%, -50%)";
             soonWrapper.style.color = "red";
             return;
         }
-
         const x = -50 + (Math.random() * 6 - 3);
         const y = -50 + (Math.random() * 6 - 3);
         soonWrapper.style.transform = `translate(${x}%, ${y}%)`;
         soonWrapper.style.color = colors[Math.floor(Math.random() * colors.length)];
-
         requestAnimationFrame(glitchMove);
     }
+
     requestAnimationFrame(glitchMove);
 }
 </script>
